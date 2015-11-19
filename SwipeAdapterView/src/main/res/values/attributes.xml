@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="SwipeAdapterView">
+    <attr name="ViewMode" format="enum">
+      <enum name="List" value="0"/>
+      <enum name="Grid" value="1"/>
+    </attr>
+    <attr name="PromptMode" format="enum">
+      <enum name="TextOnly" value="0"/>
+      <enum name="ImageOnly" value="1"/>
+      <enum name="ImageTop_TextBottom" value="2"/>
+      <enum name="ImageBottom_TextTop" value="3"/>
+      <enum name="ImageLeft_TextRight" value="4"/>
+      <enum name="ImageRight_TextLeft" value="5"/>
+    </attr>
+    <attr name="FooterEnabled" format="enum">
+      <enum name="False" value="0"/>
+      <enum name="True" value="1"/>
+    </attr>
+    <attr name="FooterHeight" format="dimension|reference"/>
+    <attr name="FooterBackground" format="reference"/>
+  </declare-styleable>
+</resources>

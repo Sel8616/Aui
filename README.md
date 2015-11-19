@@ -7,6 +7,9 @@
 
 __SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
 
+[--> Download demo APK <--](https://git.oschina.net/sel/R/raw/master/demo/SwipeAdapterView_Demo.apk "Download demo APK")
+
+
 ###♨ Features
 ***
 

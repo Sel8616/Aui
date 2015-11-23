@@ -1,4 +1,4 @@
-package cn.sel.android.demo;
+package cn.sel.SwipeAdapterView_Demo;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cn.sel.android.ui.SwipeAdapterView;
@@ -48,7 +47,7 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
     data_all = new ArrayList<>(50);
     for(int i = 0; i < 50; i++)
     {
-      data_all.add((i + 1) + "." + GetRandomCode(6));
+      data_all.add("This is Item " + (i + 1));
     }
     data_got = new ArrayList<>();
     final DataAdapter adapter = new DataAdapter();
@@ -183,17 +182,17 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
         {//Success
           if(refresh)
           {
-            handler.sendEmptyMessageDelayed(0, 2000);
+            handler.sendEmptyMessageDelayed(0, 1000);
           }else
           {
-            handler.sendEmptyMessageDelayed(2, 2000);
+            handler.sendEmptyMessageDelayed(2, 1000);
           }
         }else
         {//Empty
           if(refresh)
-            handler.sendEmptyMessageDelayed(1, 2000);
+            handler.sendEmptyMessageDelayed(1, 1000);
           else
-            handler.sendEmptyMessageDelayed(3, 2000);
+            handler.sendEmptyMessageDelayed(3, 1000);
         }
       }
     });
@@ -304,25 +303,5 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
     {
       return 0;
     }
-  }
-
-  /**
-   * Generate random code of specified length with following letters:a-z,A-Z and 0-9
-   *
-   * @return A random string
-   */
-  public String GetRandomCode(int length)
-  {
-    final char[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
-        't', 'u', 'v', 'w', 'x', 'y', 'z'};
-    String result;
-    final Random random = new Random();
-    final char[] cs = new char[length];
-    for(int i = 0; i < length; i++)
-    {
-      cs[i] = digits[random.nextInt(digits.length)];
-    }
-    result = new String(cs);
-    return result;
   }
 }

@@ -10,7 +10,7 @@
       android:id="@+id/asharp_swipe_layout"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      app:FooterBackground="@android:color/holo_red_dark"
-      app:FooterHeight="72dp"
+      app:FooterBackground="@android:color/darker_gray"
+      app:FooterHeight="48dp"
       app:ViewMode="List"/>
 </LinearLayout>

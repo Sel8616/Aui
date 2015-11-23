@@ -4,15 +4,15 @@
 
 ###⿻ About
 ***
-
 __SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
+
+[--> Download aar <--](https://git.oschina.net/sel/R/raw/master/lib/SwipeAdapterView.aar "Download aar")
 
 [--> Download demo APK <--](https://git.oschina.net/sel/R/raw/master/demo/SwipeAdapterView_Demo.apk "Download demo APK")
 
 
 ###♨ Features
 ***
-
 ● Refresh data by pulling action when the GridView is scrolled to the top.
 
 ● Load more data by clicking the FooterBar
@@ -26,10 +26,8 @@ __SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
 ● ...
 
 
-
 ###☀ Notice
 ***
-
 ● This is an AndroidStudio project.
 
 ● SDK level requirement is 15-23.
@@ -37,16 +35,15 @@ __SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
 
 ###☹ Possible Problems
 ***
-
 ● Programming bugs
 
 ● UI crash
 
 ● ...
 
+
 ###⚘ Next
 ***
-
 ● More 'declare-styleable'
 
 ● Bugs fixing
@@ -58,7 +55,6 @@ __SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
 
 ###☺ Contact
 ***
-
 ✉  sel8616@gmail.com    philshang@163.com
 
 Ⓠ  117764756

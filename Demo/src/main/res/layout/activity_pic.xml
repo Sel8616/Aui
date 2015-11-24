@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:gravity="center"
+        android:text="URL"/>
+
+    <EditText
+        android:id="@+id/input_url"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:inputType="textUri"/>
+
+  </LinearLayout>
+
+
+  <cn.sel.aui.PictureView
+      android:id="@+id/pictureView"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"/>
+
+
+  <Button
+      android:id="@+id/btn_choose"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Choose From Photo"/>
+
+  <Button
+      android:id="@+id/btn_url"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Get From URL"/>
+
+</LinearLayout>

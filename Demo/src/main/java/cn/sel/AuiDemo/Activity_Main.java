@@ -28,6 +28,9 @@ public class Activity_Main extends Activity
             intent = new Intent(Activity_Main.this, Activity_SwipeAdapterView.class);
             break;
           case 1:
+            intent = new Intent(Activity_Main.this, Activity_PictureView.class);
+            break;
+          case 2:
             intent = new Intent(Activity_Main.this, Activity_ViewLooper.class);
             break;
           default:

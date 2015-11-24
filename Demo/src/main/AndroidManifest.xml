@@ -22,6 +22,9 @@
         android:name=".Activity_SwipeAdapterView"
         android:label="@string/title_swipe"/>
     <activity
+        android:name=".Activity_PictureView"
+        android:label="@string/title_picture"/>
+    <activity
         android:name=".Activity_ViewLooper"
         android:label="@string/title_looper"/>
   </application>

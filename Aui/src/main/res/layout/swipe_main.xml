@@ -25,7 +25,5 @@
         layout="@layout/swipe_error"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
   </ViewFlipper>
-
 </android.support.v4.widget.SwipeRefreshLayout>

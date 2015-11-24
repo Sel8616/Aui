@@ -1,3 +1,7 @@
 <resources>
-  <string name="app_name">SwipeAdapterView Demo</string>
+  <string name="app_name">Aui Demo</string>
+  <string name="title_swipe">SwipeAdapterView Demo</string>
+  <string name="title_looper">ViewLooper Demo</string>
+  <string name="title_edit">EditBox Demo</string>
+  <string name="title_picture">PictureView Demo</string>
 </resources>

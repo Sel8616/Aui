@@ -1,29 +1,35 @@
-![SwipeAdapterView](https://git.oschina.net/sel/R/raw/master/img/android_moto.jpg)
+![Aui](https://git.oschina.net/sel/R/raw/master/img/aui.png)
 
-#SwipeAdapterView
+#Aui
 
 ###⿻ About
 ***
 __SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
 
-[--> Download aar <--](https://git.oschina.net/sel/R/raw/master/lib/SwipeAdapterView.aar "Download aar")
+__ViewLooper__ is a simple looping view pager.
 
-[--> Download demo APK <--](https://git.oschina.net/sel/R/raw/master/demo/SwipeAdapterView_Demo.apk "Download demo APK")
+[--> Download aar <--](https://git.oschina.net/sel/R/raw/master/lib/Aui.aar "Download aar")
+
+[--> Download demo APK <--](https://git.oschina.net/sel/R/raw/master/demo/Aui_Demo.apk "Download demo APK")
 
 
 ###♨ Features
 ***
-● Refresh data by pulling action when the GridView is scrolled to the top.
+● SwipeAdapterView
 
-● Load more data by clicking the FooterBar
+>Refresh data by pulling action when the GridView is scrolled to the top.
 
-● Show/Hide the FooterBar
+>Load more data by clicking the FooterBar
 
-● Switch the GridView between LIST mode and GRID mode
+>Show/Hide the FooterBar
 
-● Set the column number of the GridView
+>Switch the GridView between LIST mode and GRID mode
 
-● ...
+>Set the column number of the GridView
+
+● ViewLooper
+
+>Dynamically add or remove a view. 
 
 
 ###☀ Notice
@@ -44,7 +50,7 @@ __SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
 
 ###⚘ Next
 ***
-● More 'declare-styleable'
+● More 'declare-styleable' for SwipeAdapterView
 
 ● Bugs fixing
 

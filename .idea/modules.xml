@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Aui.iml" filepath="$PROJECT_DIR$/Aui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Aui/Aui-Aui.iml" filepath="$PROJECT_DIR$/Aui/Aui-Aui.iml" />
       <module fileurl="file://$PROJECT_DIR$/Demo/Demo.iml" filepath="$PROJECT_DIR$/Demo/Demo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SwipeAdapterView.iml" filepath="$PROJECT_DIR$/SwipeAdapterView.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SwipeAdapterView/SwipeAdapterView-SwipeAdapterView.iml" filepath="$PROJECT_DIR$/SwipeAdapterView/SwipeAdapterView-SwipeAdapterView.iml" />
     </modules>
   </component>
 </project>

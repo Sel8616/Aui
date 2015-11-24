@@ -1,0 +1,9 @@
+<resources>
+  <string-array name="entry">
+    <item>SwipeAdapterView</item>
+    <item>ViewLooper</item>
+    <item>EditBox</item>
+    <item>PictureView</item>
+    <item>……</item>
+  </string-array>
+</resources>

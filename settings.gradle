@@ -1,1 +1,1 @@
-include ':Demo', ':SwipeAdapterView'
+include ':Demo', ':Aui'

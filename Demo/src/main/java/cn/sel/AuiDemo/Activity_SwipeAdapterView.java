@@ -1,4 +1,4 @@
-package cn.sel.SwipeAdapterView_Demo;
+package cn.sel.AuiDemo;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import cn.sel.android.ui.SwipeAdapterView;
-
+import cn.sel.aui.SwipeAdapterView;
 
 public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterView.ActionListener
 {
@@ -39,8 +38,8 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
   protected void onCreate(Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-    swipe = (SwipeAdapterView) findViewById(R.id.asharp_swipe_layout);
+    setContentView(R.layout.activity_swipe);
+    swipe = (SwipeAdapterView) findViewById(R.id.aui_swipe);
     cols = 1;
     pageSize = 12;
     buffer = new ArrayList<>(pageSize);
@@ -200,7 +199,6 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-
   private class DataAdapter extends BaseAdapter
   {
     private int tv_no_id = generateViewId(0);
@@ -284,7 +282,6 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
       public TextView tv_no, tv_content;
     }
   }
-
 
   /**
    * Dip 2 Pix

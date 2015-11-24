@@ -9,8 +9,15 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Aui" />
             <option value="$PROJECT_DIR$/Demo" />
-            <option value="$PROJECT_DIR$/SwipeAdapterView" />
+          </set>
+        </option>
+        <option name="myModules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Aui" />
+            <option value="$PROJECT_DIR$/Demo" />
           </set>
         </option>
       </GradleProjectSettings>

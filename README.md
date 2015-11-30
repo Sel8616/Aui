@@ -19,18 +19,23 @@
 ***
 ####☞ SwipeAdapterView
 * Data Loading
+
 Refresh by pulling action when the GridView is scrolled to the top.Load more by clicking the FooterBar
 
 * Data View(LIST/GRID)
+
 Display data in a ListView or GridView. Column num of the GridView is modifiable.
 
 * FooterBar(DOCKED/SCROLLING/DISABLED)
+
 Show messages related with data loading. Docked at the bottom/Pinned in the end of data list/Disabled
 
 * TranscriptMode(NORMAL/ALWAYS_SCROLL/DISABLED)
+
 Synonym for AbsListView.TranscriptMode
 
 * FloatingButton(ENABLED/DISABLED)
+
 Click to scroll back to the top quickly
 
 ####☞ PictureView

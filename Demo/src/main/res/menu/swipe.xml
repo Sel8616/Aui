@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+      android:title="ViewMode">
+    <menu>
+      <item
+          android:id="@+id/Menu_ViewMode_List"
+          android:title="ListView"/>
+      <item
+          android:id="@+id/Menu_ViewMode_Grid"
+          android:title="GridView"/>
+    </menu>
+  </item>
+  <item android:title="Column">
+    <menu>
+      <item
+          android:id="@+id/Menu_Column_Add"
+          android:title="+"/>
+      <item
+          android:id="@+id/Menu_Column_Minus"
+          android:title="-"/>
+    </menu>
+  </item>
+  <item android:title="TranscriptMode">
+    <menu>
+      <item
+          android:id="@+id/Menu_TranscriptMode_Disabled"
+          android:title="Disabled"/>
+      <item
+          android:id="@+id/Menu_TranscriptMode_Normal"
+          android:title="Normal"/>
+      <item
+          android:id="@+id/Menu_TranscriptMode_AlwaysScroll"
+          android:title="AlwaysScroll"/>
+    </menu>
+  </item>
+  <item android:title="FooterMode">
+    <menu>
+      <item
+          android:id="@+id/Menu_FooterMode_Disabled"
+          android:title="Disabled"/>
+      <item
+          android:id="@+id/Menu_FooterMode_Docked"
+          android:title="Docked"/>
+      <item
+          android:id="@+id/Menu_FooterMode_Scrolling"
+          android:title="Scrolling"/>
+    </menu>
+  </item>
+  <item android:title="FloatingButton">
+    <menu>
+      <item
+          android:id="@+id/Menu_Floating_Enabled"
+          android:title="Enabled"/>
+      <item
+          android:id="@+id/Menu_Floating_Disabled"
+          android:title="Disabled"/>
+    </menu>
+  </item>
+</menu>

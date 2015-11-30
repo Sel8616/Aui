@@ -31,8 +31,8 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
   private boolean isScrollStopped;
   private boolean isFirstLayout;
   private ArrayList<View> loopingViews;
-  private GestureDetector gestureDetector;
-  private Scroller scroller;
+  private final GestureDetector gestureDetector;
+  private final Scroller scroller;
 
   public ViewLooper(Context context, AttributeSet attrs)
   {
@@ -54,9 +54,12 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
             if(Math.abs(scrolledX) >= width / 2)
             {
               if(scrolledX > 0)
+              {
                 ShowPrevious();
-              else
+              }else
+              {
                 ShowNext();
+              }
             }else
             {
               Scroll(false);
@@ -112,9 +115,12 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
       if(index >= 0 && index < viewCount)
       {
         if(index == GetPreviousIndex())
+        {
           ShowPrevious();
-        else if(index == GetNextIndex())
+        }else if(index == GetNextIndex())
+        {
           ShowNext();
+        }
       }else
       {
         curViewIndex = index;
@@ -123,7 +129,7 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
     }
   }
 
-  void LoadViews()
+  private void LoadViews()
   {
     removeAllViews();
     switch(pageCount)
@@ -158,9 +164,13 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
     if(viewCount > 0)
     {
       if(curViewIndex < 0)
+      {
         curViewIndex = 0;
+      }
       if(curViewIndex >= viewCount)
+      {
         curViewIndex = viewCount - 1;
+      }
     }else
     {
       curViewIndex = -1;
@@ -168,28 +178,30 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
     LoadViews();
   }
 
-  void ShowPrevious()
+  private void ShowPrevious()
   {
     curViewIndex = GetPreviousIndex();
     Order(-1);
     Scroll(true);
   }
 
-  void ShowNext()
+  private void ShowNext()
   {
     curViewIndex = GetNextIndex();
     Order(1);
     Scroll(true);
   }
 
-  int GetCount()
+  private int GetCount()
   {
     if(loopingViews != null)
+    {
       return loopingViews.size();
+    }
     return 0;
   }
 
-  void Order(int scrollDirection)
+  private void Order(int scrollDirection)
   {
     int viewCount = GetCount();
     int index_PreviousPage = GetPreviousPage();
@@ -210,10 +222,14 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
         break;
       case 0:
         if(pageCount == 3)
+        {
           getChildAt(index_PreviousPage).layout(left_leftPage, 0, right_leftPage, height);
+        }
         getChildAt(curPageIndex).layout(left_display, 0, right_display, height);
         if(pageCount > 1)
+        {
           getChildAt(index_NextPage).layout(left_rightPage, 0, right_rightPage, height);
+        }
         break;
       case 1:
         if(pageCount == 3)
@@ -230,7 +246,7 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
     }
   }
 
-  void Scroll(boolean changed)
+  private void Scroll(boolean changed)
   {
     isScrollTo = true;
     if(changed)
@@ -238,48 +254,61 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
       if(scrolledX > 0)
       {
         if(pageCount == 3)
+        {
           scroller.startScroll(-scrolledX + width, 0, scrolledX - width, 0);
-        else
+        }else
+        {
           scroller.startScroll(width - scrolledX, 0, scrolledX - width, 0);
+        }
       }else
       {
         if(pageCount == 3)
+        {
           scroller.startScroll(-scrolledX - width, 0, scrolledX + width, 0);
-        else
+        }else
+        {
           scroller.startScroll(-scrolledX, 0, width + scrolledX, 0);
+        }
       }
     }else
     {
       if(pageCount == 3)
+      {
         scroller.startScroll(-scrolledX, 0, scrolledX, 0);
-      else
+      }else
+      {
         scroller.startScroll(curPageIndex * width - scrolledX, 0, scrolledX, 0);
+      }
     }
     invalidate();
   }
 
-  int GetPreviousIndex()
+  private int GetPreviousIndex()
   {
     int viewCount = GetCount();
     if(curViewIndex >= 0 && viewCount > 0)
+    {
       return (curViewIndex + viewCount - 1) % viewCount;
+    }
     return -1;
   }
 
-  int GetNextIndex()
+  private int GetNextIndex()
   {
     int viewCount = GetCount();
     if(curViewIndex >= 0 && viewCount > 0)
+    {
       return (curViewIndex + 1) % viewCount;
+    }
     return -1;
   }
 
-  int GetPreviousPage()
+  private int GetPreviousPage()
   {
     return (curPageIndex + pageCount - 1) % pageCount;
   }
 
-  int GetNextPage()
+  private int GetNextPage()
   {
     return (curPageIndex + 1) % pageCount;
   }
@@ -343,15 +372,21 @@ public class ViewLooper extends ViewGroup implements GestureDetector.OnGestureLi
     if(velocityX > 0 && e2.getX() - e1.getX() > 0)
     {
       if(pageCount == 2 && curPageIndex == 0)
+      {
         return true;
+      }
       ShowPrevious();
     }else if(velocityX < 0 && e2.getX() - e1.getX() < 0)
     {
       if(pageCount == 2 && curPageIndex == 1)
+      {
         return true;
+      }
       ShowNext();
     }else
+    {
       Scroll(true);
+    }
     isActionUpHandled = true;
     return true;
   }

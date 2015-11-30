@@ -4,9 +4,11 @@
 
 ###⿻ About
 ***
-__SwipeAdapterView__ = SwipeRefreshLayout + GridView + FooterBar(Custom)
+**SwipeAdapterView** = SwipeRefreshLayout + GridView + FooterBar(Custom)
 
-__ViewLooper__ is a simple looping view pager.
+**PictureView** = A image view that can display image from a remote url.
+
+**ViewLooper** = A simple looping viewpager.
 
 [--> Download aar <--](https://git.oschina.net/sel/R/raw/master/lib/Aui.aar "Download aar")
 
@@ -15,21 +17,29 @@ __ViewLooper__ is a simple looping view pager.
 
 ###♨ Features
 ***
-● SwipeAdapterView
+####☞ SwipeAdapterView
+* Data Loading
+Refresh by pulling action when the GridView is scrolled to the top.Load more by clicking the FooterBar
 
->Refresh data by pulling action when the GridView is scrolled to the top.
+* Data View(LIST/GRID)
+Display data in a ListView or GridView. Column num of the GridView is modifiable.
 
->Load more data by clicking the FooterBar
+* FooterBar(DOCKED/SCROLLING/DISABLED)
+Show messages related with data loading. Docked at the bottom/Pinned in the end of data list/Disabled
 
->Show/Hide the FooterBar
+* TranscriptMode(NORMAL/ALWAYS_SCROLL/DISABLED)
+Synonym for AbsListView.TranscriptMode
 
->Switch the GridView between LIST mode and GRID mode
+* FloatingButton(ENABLED/DISABLED)
+Click to scroll back to the top quickly
 
->Set the column number of the GridView
+####☞ PictureView
+* Display android.Drawable or image from local/remote file. 
 
-● ViewLooper
+####☞ ViewLooper
+* Dynamically add or remove a page. 
 
->Dynamically add or remove a view. 
+* Switch the pages by scroll or fling actions. 
 
 
 ###☀ Notice
@@ -39,22 +49,24 @@ __ViewLooper__ is a simple looping view pager.
 ● SDK level requirement is 15-23.
 
 
-###☹ Possible Problems
+###☹ Problems
 ***
-● Programming bugs
-
-● UI crash
-
-● ...
+● Stupid GridView [Issue](https://github.com/Sel8616/Aui/issues/1)
 
 
 ###⚘ Next
 ***
-● More 'declare-styleable' for SwipeAdapterView
+● \[SwipeAdapterView\] Scroll data list by moving 'FloatingButton' up/down.
 
-● Bugs fixing
+● Divider support for SwipeAdapterView.
 
-● Stability improving
+● More 'declare-styleable' attributes.
+
+● Stability and performance improving
+
+● Bug fixing.
+
+● New Control~perhaps
 
 ● ...
 

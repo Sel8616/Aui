@@ -1,4 +1,4 @@
-package cn.sel.AuiDemo;
+package cn.sel.aui_demo;
 
 import android.app.Activity;
 import android.content.Context;

@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:id="@+id/asharp_swipe_footer"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
-  <ProgressBar
-      android:id="@+id/asharp_swipe_footer_progress"
+  <ImageView
+      android:id="@+id/swipe_prompt_image"
       android:layout_width="wrap_content"
-      android:layout_height="match_parent"
-      android:indeterminate="true"
-      android:indeterminateBehavior="repeat"
-      android:indeterminateOnly="true"/>
+      android:layout_height="match_parent"/>
 
   <TextView
-      android:id="@+id/asharp_swipe_footer_text"
+      android:id="@+id/swipe_prompt_text"
       android:layout_width="wrap_content"
       android:layout_height="match_parent"
+      android:drawablePadding="10dp"
+      android:ellipsize="middle"
       android:gravity="center"/>
 </LinearLayout>

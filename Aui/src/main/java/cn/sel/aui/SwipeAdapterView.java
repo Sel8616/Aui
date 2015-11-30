@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -21,11 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-/**
- * SwipeRefreshLayout + GridView
- */
-public class SwipeAdapterView extends LinearLayout implements SwipeRefreshLayout.OnRefreshListener,
-    View.OnClickListener, GridView.OnScrollListener, GridView.OnItemClickListener
+import java.util.List;
+
+public class SwipeAdapterView extends LinearLayout
 {
   public enum ViewMode
   {
@@ -37,6 +34,16 @@ public class SwipeAdapterView extends LinearLayout implements SwipeRefreshLayout
     Text, Image, ImageText_TB, ImageText_BT, ImageText_LR, ImageText_RL
   }
 
+  public enum FooterMode
+  {
+    Disabled, Scrolling, Docked
+  }
+
+  public enum TranscriptMode
+  {
+    Disabled, Normal, AlwaysScroll
+  }
+
   private enum FooterStatus
   {
     Hide, Loading, Loaded, Empty, Fail
@@ -44,78 +51,270 @@ public class SwipeAdapterView extends LinearLayout implements SwipeRefreshLayout
 
   public interface ActionListener
   {
-    void OnRefreshing();
+    /**
+     * Handle 'Refresh' event to reload data.
+     */
+    void onRefresh();
 
-    void OnRefreshed(boolean success);
+    /**
+     * Handle 'More' event to load next page of data.
+     */
+    void onMore();
 
-    void OnNexting();
+    /**
+     * Handle item click event.
+     *
+     * @param position Index of this item(start with 0)
+     * @param data     Current data object(A force-cast may be necessary)
+     * @param view     Current item view
+     */
+    void onItemSelect(int position, Object data, View view);
 
-    void OnNexted(boolean success);
+    /**
+     * @return Template view. Normally, it should be inflated from a layout source file.
+     */
+    View getViewTemplate();
 
-    void OnItemSelect(int position, Object data, View view);
+    /**
+     * For ViewHolder pattern, when 'convertView' was null, {@link #getViewTemplate} gave a new instance without any holder yet, this method would init a holder for it.     * @param convertView current
+     *
+     * @param convertView Current new instantiated 'convertView'
+     *
+     * @return A new ViewHolder that should be defined in user code.
+     */
+    Object getViewHolder(View convertView);
+
+    /**
+     * Fill the view holder with the data in the specific position.<br>
+     * Because the data structure was unknown as the view's, this work must be done by the user.
+     *
+     * @param viewHolder Current view holder
+     * @param position   Index of data(start with 0)
+     */
+    void fillCurrentItem(Object viewHolder, int position);
+  }
+
+  /**
+   * Listen refresh event of {@link #swipeRefreshLayout}
+   */
+  final SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener()
+  {
+    @Override
+    public void onRefresh()
+    {
+      if(isLoading)
+      {
+        Common.ShowMessage(context, msgAlreadyLoading);
+      }else if(actionListener != null)
+      {
+        showPrompt(msgLoading);
+        changeFooter(FooterStatus.Hide, null);
+        isLoading = true;
+        actionListener.onRefresh();
+      }else
+      {
+        ShowBug();
+      }
+    }
+  };
+  /**
+   * Listen scroll event of {@link #dataGridView}
+   */
+  final AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener()
+  {
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState)
+    {
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+    {
+      swipeRefreshLayout.setEnabled(firstVisibleItem == 0);
+    }
+  };
+  /**
+   * Listen item clicked event of {@link #dataGridView}
+   */
+  final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener()
+  {
+    @Override
+    final public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    {
+      if(savedFooterMode != FooterMode.Scrolling || position != dataAdapter.getCount())
+      {
+        if(actionListener != null)
+        {
+          actionListener.onItemSelect(position, dataGridView.getItemAtPosition(position), view);
+        }
+      }
+    }
+  };
+  /**
+   * Listen clicked event of footerBar
+   */
+  final OnClickListener onClickListener = new OnClickListener()
+  {
+    @Override
+    public void onClick(View v)
+    {
+      if(v.getId() == R.id.faButton)
+      {
+        dataGridView.smoothScrollToPosition(0);
+      }else
+      {
+        if(isLoading)
+        {
+          Common.ShowMessage(context, msgAlreadyLoading);
+        }else if(actionListener != null)
+        {
+          changeFooter(FooterStatus.Loading, msgLoading);
+          isLoading = true;
+          actionListener.onMore();
+        }else
+        {
+          ShowBug();
+        }
+      }
+    }
+  };
+
+  /**
+   * Data adapter for {@link #dataGridView}
+   */
+  private class DataAdapter extends BaseAdapter
+  {
+    @Override
+    public int getCount()
+    {
+      final int actualCount = dataList == null ? 0 : dataList.size();
+      return (savedViewMode == ViewMode.ListView && savedFooterMode == FooterMode.Scrolling) ? actualCount + 1 : actualCount;
+    }
+
+    @Override
+    public Object getItem(int position)
+    {
+      if(dataList != null && position >= 0 && position < dataList.size())
+      {
+        return dataList.get(position);
+      }
+      return null;
+    }
+
+    @Override
+    public long getItemId(int position)
+    {
+      return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent)
+    {
+      if(savedViewMode == ViewMode.ListView && savedFooterMode == FooterMode.Scrolling && position == getCount() - 1)
+      {
+        return scrollFooterBar;
+      }else
+      {
+        Object viewHolder;
+        if(convertView == null || convertView.getId() == scrollFooterBar.getId())
+        {
+          convertView = actionListener.getViewTemplate();
+          viewHolder = actionListener.getViewHolder(convertView);
+          convertView.setTag(viewHolder);
+        }else
+        {
+          viewHolder = convertView.getTag();
+        }
+        actionListener.fillCurrentItem(viewHolder, position);
+        return convertView;
+      }
+    }
   }
 
   private Context context;
-  private ViewMode viewMode;
   private int columnNum;
-  private boolean footerEnabled = true;
+  private boolean isLoading;
+  private Drawable floatingButtonDrawable;
   private Drawable footerBackground;
-  private PromptType promptType;
+  private ViewMode savedViewMode;
+  private FooterMode savedFooterMode;
+  private PromptType savedPromptType;
   private ActionListener actionListener;
+  private DataAdapter dataAdapter;
+  private List dataList;
+  //
+  private String msgLoading = "Loading...";
+  private String msgAlreadyLoading = "Slow down your finger!";
+  private String msgRefreshSuccess = "Success!";
+  private String msgRefreshEmpty = "No Data!";
+  private String msgRefreshFailure = "Failure!";
+  private String msgMoreSuccess = "Success!";
+  private String msgMoreEmpty = "No Data!";
+  private String msgMoreFailure = "Failure!";
+  //
   private SwipeRefreshLayout swipeRefreshLayout;
-  private ViewFlipper flipper_Main;
-  private GridView data_GridView;
-  private LinearLayout footer;
-  private TextView footer_Text;
-  private ProgressBar footer_Progress;
-  private TextView prompt_Text;
-  private ImageView prompt_Image;
+  private ViewFlipper viewFlipper;
+  private GridView dataGridView;
+  private TextView promptText;
+  private ImageView promptImage;
+  private LinearLayout dockedFooterBar, scrollFooterBar;
+  private TextView dockedFooterText, scrollFooterText;
+  private ProgressBar dockedFooterProgress, scrollFooterProgress;
+  private ImageView floatingButton;
 
   public SwipeAdapterView(Context context)
   {
     super(context);
-    Init();
-    InitCustomProperties(null, 0);
+    InitViews();
+    InitCustomAttributes(null, 0);
   }
 
   public SwipeAdapterView(Context context, AttributeSet attrs)
   {
     super(context, attrs);
-    Init();
-    InitCustomProperties(attrs, 0);
+    InitViews();
+    InitCustomAttributes(attrs, 0);
   }
 
   public SwipeAdapterView(Context context, AttributeSet attrs, int defStyle)
   {
     super(context, attrs, defStyle);
-    Init();
-    InitCustomProperties(attrs, defStyle);
+    InitViews();
+    InitCustomAttributes(attrs, defStyle);
   }
 
-  private void Init()
+  private void InitViews()
   {
     context = getContext();
+    dataAdapter = new DataAdapter();
     setOrientation(VERTICAL);
-    swipeRefreshLayout = (SwipeRefreshLayout) View.inflate(context, R.layout.swipe_main, null);
-    footer = (LinearLayout) View.inflate(context, R.layout.swipe_footer, null);
-    swipeRefreshLayout.setOnRefreshListener(this);
-    flipper_Main = (ViewFlipper) swipeRefreshLayout.findViewById(R.id.asharp_swipe_container);
-    prompt_Text = (TextView) flipper_Main.findViewById(R.id.asharp_swipe_prompt_text);
-    prompt_Image = (ImageView) flipper_Main.findViewById(R.id.asharp_swipe_prompt_image);
-    data_GridView = (GridView) flipper_Main.findViewById(R.id.asharp_swipe_content);
-    data_GridView.setOnScrollListener(this);
-    data_GridView.setOnItemClickListener(this);
-    SetViewMode(ViewMode.ListView);
-    footer_Text = (TextView) footer.findViewById(R.id.asharp_swipe_footer_text);
-    footer_Progress = (ProgressBar) footer.findViewById(R.id.asharp_swipe_footer_progress);
-    footer.setOnClickListener(this);
-    ChangeFooter(FooterStatus.Hide, null);
+    View.inflate(context, R.layout.swipe_adapter_view_main, this);
+    swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+    dockedFooterBar = (LinearLayout) View.inflate(context, R.layout.swipe_adapter_view_footer, null);
+    scrollFooterBar = (LinearLayout) View.inflate(context, R.layout.swipe_adapter_view_footer, null);
+    viewFlipper = (ViewFlipper) swipeRefreshLayout.findViewById(R.id.swipe_flipper);
+    promptText = (TextView) viewFlipper.findViewById(R.id.swipe_prompt_text);
+    promptImage = (ImageView) viewFlipper.findViewById(R.id.swipe_prompt_image);
+    dataGridView = (GridView) viewFlipper.findViewById(R.id.swipe_content);
+    dockedFooterText = (TextView) dockedFooterBar.findViewById(R.id.swipe_footer_text);
+    dockedFooterProgress = (ProgressBar) dockedFooterBar.findViewById(R.id.swipe_footer_progress);
+    scrollFooterText = (TextView) scrollFooterBar.findViewById(R.id.swipe_footer_text);
+    scrollFooterProgress = (ProgressBar) scrollFooterBar.findViewById(R.id.swipe_footer_progress);
+    floatingButton = (ImageView) findViewById(R.id.faButton);
+    changeFooter(FooterStatus.Hide, null);
+    dataGridView.setAdapter(dataAdapter);
+    swipeRefreshLayout.setOnRefreshListener(onRefreshListener);
+    dataGridView.setOnScrollListener(onScrollListener);
+    dataGridView.setOnItemClickListener(onItemClickListener);
+    dockedFooterBar.setOnClickListener(onClickListener);
+    scrollFooterBar.setOnClickListener(onClickListener);
+    floatingButton.setOnClickListener(onClickListener);
   }
 
-  private void InitCustomProperties(AttributeSet attrs, int defStyle)
+  private void InitCustomAttributes(AttributeSet attrs, int defStyle)
   {
-    int style_view_mode, style_prompt_mode, style_prompt_footer;
-    int footerHeight = GetPixFromDip(context, 44);
+    int style_view_mode, style_prompt_mode, style_footer_mode, list_transcript_mode;
+    int footerHeight = context.getResources().getDimensionPixelSize(R.dimen.footer_height);
     final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SwipeAdapterView, defStyle, 0);
     if(a.hasValue(R.styleable.SwipeAdapterView_ViewMode))
     {
@@ -131,443 +330,630 @@ public class SwipeAdapterView extends LinearLayout implements SwipeRefreshLayout
     {
       style_prompt_mode = 0;
     }
-    if(a.hasValue(R.styleable.SwipeAdapterView_FooterEnabled))
+    if(a.hasValue(R.styleable.SwipeAdapterView_FooterMode))
     {
-      style_prompt_footer = a.getInt(R.styleable.SwipeAdapterView_FooterEnabled, 1);
+      style_footer_mode = a.getInt(R.styleable.SwipeAdapterView_FooterMode, 1);
     }else
     {
-      style_prompt_footer = 1;
+      style_footer_mode = 1;
+    }
+    if(a.hasValue(R.styleable.SwipeAdapterView_TranscriptMode))
+    {
+      list_transcript_mode = a.getInt(R.styleable.SwipeAdapterView_TranscriptMode, 1);
+    }else
+    {
+      list_transcript_mode = 1;
     }
     if(a.hasValue(R.styleable.SwipeAdapterView_FooterHeight))
     {
       footerHeight = a.getDimensionPixelSize(R.styleable.SwipeAdapterView_FooterHeight, footerHeight);
     }
+    if(a.hasValue(R.styleable.SwipeAdapterView_FloatingButtonBackground))
+    {
+      floatingButtonDrawable = a.getDrawable(R.styleable.SwipeAdapterView_FloatingButtonBackground);
+    }
     if(a.hasValue(R.styleable.SwipeAdapterView_FooterBackground))
     {
       footerBackground = a.getDrawable(R.styleable.SwipeAdapterView_FooterBackground);
     }
+    boolean floatingButtonEnabled = !a.hasValue(R.styleable.SwipeAdapterView_FloatingButtonEnabled) || a.getBoolean(R.styleable.SwipeAdapterView_FloatingButtonEnabled, true);
     a.recycle();
-    viewMode = style_view_mode == 0 ? ViewMode.ListView : ViewMode.GridView;
-    footerEnabled = style_prompt_footer == 1;
+    setFloatingButtonEnable(floatingButtonEnabled);
+    setViewMode(style_view_mode == 0 ? ViewMode.ListView : ViewMode.GridView);
+    if(floatingButtonDrawable == null)
+    {
+      floatingButtonDrawable = getResources().getDrawable(R.drawable.selector_up_top);
+    }
     if(footerBackground == null)
     {
       footerBackground = getResources().getDrawable(android.R.drawable.bottom_bar);
     }
+    switch(style_footer_mode)
+    {
+      case 1:
+        setFooterMode(FooterMode.Docked);
+        break;
+      case 2:
+        setFooterMode(FooterMode.Scrolling);
+        break;
+      default:
+        setFooterMode(FooterMode.Disabled);
+        break;
+    }
+    switch(list_transcript_mode)
+    {
+      case 1:
+        setTranscriptMode(TranscriptMode.Normal);
+        break;
+      case 2:
+        setTranscriptMode(TranscriptMode.AlwaysScroll);
+        break;
+      default:
+        setTranscriptMode(TranscriptMode.Disabled);
+        break;
+    }
     switch(style_prompt_mode)
     {
       case 0:
-        promptType = PromptType.Text;
+        setPromptType(PromptType.Text);
         break;
       case 1:
-        promptType = PromptType.Image;
+        setPromptType(PromptType.Image);
         break;
       case 2:
-        promptType = PromptType.ImageText_TB;
+        setPromptType(PromptType.ImageText_TB);
         break;
       case 3:
-        promptType = PromptType.ImageText_BT;
+        setPromptType(PromptType.ImageText_BT);
         break;
       case 4:
-        promptType = PromptType.ImageText_LR;
+        setPromptType(PromptType.ImageText_LR);
         break;
       case 5:
-        promptType = PromptType.ImageText_RL;
+        setPromptType(PromptType.ImageText_RL);
         break;
     }
-    footer.setBackgroundDrawable(footerBackground);
-    addView(swipeRefreshLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1));
-    addView(footer, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, footerHeight));
+    LayoutParams footerBarLayoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, footerHeight);
+    dockedFooterBar.setLayoutParams(footerBarLayoutParams);
+    scrollFooterBar.setLayoutParams(footerBarLayoutParams);
+    dockedFooterBar.setBackgroundDrawable(footerBackground);
+    scrollFooterBar.setBackgroundDrawable(footerBackground);
+    floatingButton.setImageDrawable(floatingButtonDrawable);
   }
 
-  public void SetActionListener(ActionListener listener)
+  /**
+   * Set columns number of {@link #dataGridView}
+   *
+   * @param cols New columns number for GridView mode(min=2)
+   */
+  public void setColumnNum(int cols)
+  {
+    columnNum = cols > 1 ? cols : 2;
+    if(savedViewMode == ViewMode.GridView)
+    {
+      dataGridView.setNumColumns(columnNum);
+    }
+  }
+
+  public void setFloatingButtonEnable(boolean enabled)
+  {
+    floatingButton.setVisibility(enabled ? VISIBLE : GONE);
+  }
+
+  /**
+   * Set display mode of {@link #dataGridView}
+   *
+   * @param viewMode {@link ViewMode}
+   */
+  public void setViewMode(@NonNull ViewMode viewMode)
+  {
+    savedViewMode = viewMode;
+    if(savedViewMode == ViewMode.ListView)
+    {
+      dataGridView.setNumColumns(1);
+    }else
+    {
+      setFooterMode(FooterMode.Docked);
+      if(columnNum < 2)
+      {
+        columnNum = 2;
+      }
+      dataGridView.setNumColumns(columnNum);
+    }
+  }
+
+  /**
+   * Set display mode of footerBar
+   *
+   * @param footerBarMode {@link FooterMode}
+   */
+  public void setFooterMode(@NonNull FooterMode footerBarMode)
+  {
+    if(!swipeRefreshLayout.isRefreshing())
+    {
+      int visibility = footerBarMode == FooterMode.Disabled ? GONE : VISIBLE;
+      dockedFooterBar.setVisibility(visibility);
+      dockedFooterText.setVisibility(visibility);
+      dockedFooterProgress.setVisibility(GONE);
+      scrollFooterBar.setVisibility(visibility);
+      scrollFooterText.setVisibility(visibility);
+      scrollFooterProgress.setVisibility(GONE);
+      switch(footerBarMode)
+      {
+        case Disabled:
+          if(savedFooterMode != FooterMode.Disabled)
+          {
+            if(savedFooterMode == FooterMode.Scrolling)
+            {//Release {@link #scrollFooterBar} from dataGridView
+              savedFooterMode = FooterMode.Disabled;
+              dataAdapter.notifyDataSetChanged();
+            }else if(savedFooterMode == FooterMode.Docked)
+            {//Release footerBar from container
+              removeView(dockedFooterBar);
+              savedFooterMode = FooterMode.Disabled;
+            }
+          }
+          break;
+        case Scrolling:
+          if(savedViewMode == ViewMode.ListView)
+          {//GridView must use docked footer bar.
+            if(savedFooterMode != FooterMode.Scrolling)
+            {
+              if(savedFooterMode == FooterMode.Docked)
+              {//Release footerBar from container
+                removeView(dockedFooterBar);
+              }
+              savedFooterMode = FooterMode.Scrolling;
+              dataAdapter.notifyDataSetChanged();
+            }
+          }
+          break;
+        case Docked:
+          if(savedFooterMode != FooterMode.Docked)
+          {
+            if(savedFooterMode == FooterMode.Scrolling)
+            {//Release {@link #scrollFooterBar} from dataGridView
+              savedFooterMode = FooterMode.Docked;
+              dataAdapter.notifyDataSetChanged();
+            }
+            addView(dockedFooterBar);
+            savedFooterMode = FooterMode.Docked;
+          }
+          break;
+      }
+    }
+  }
+
+  /**
+   * Set display mode of {@link #dataGridView}
+   *
+   * @param transcriptMode {@link TranscriptMode}
+   */
+  public void setTranscriptMode(@NonNull TranscriptMode transcriptMode)
+  {
+    switch(transcriptMode)
+    {
+      case Disabled:
+        dataGridView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
+        break;
+      case Normal:
+        dataGridView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+        break;
+      case AlwaysScroll:
+        dataGridView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        break;
+    }
+  }
+
+  /**
+   * Set display mode of prompt message
+   *
+   * @param promptType {@link PromptType}
+   */
+  public void setPromptType(@NonNull PromptType promptType)
+  {
+    savedPromptType = promptType;
+    switch(savedPromptType)
+    {
+      case Text:
+        promptImage.setVisibility(GONE);
+        break;
+      case Image:
+        promptText.setVisibility(GONE);
+        break;
+      case ImageText_TB:
+        promptText.setVisibility(VISIBLE);
+        promptImage.setVisibility(VISIBLE);
+        break;
+      case ImageText_LR:
+        promptText.setVisibility(VISIBLE);
+        promptImage.setVisibility(VISIBLE);
+        break;
+      case ImageText_RL:
+        promptText.setVisibility(VISIBLE);
+        promptImage.setVisibility(VISIBLE);
+        break;
+      case ImageText_BT:
+        promptText.setVisibility(VISIBLE);
+        promptImage.setVisibility(VISIBLE);
+        break;
+    }
+  }
+
+  /**
+   * Set display content of prompt message
+   *
+   * @param text_res_id Resource id of text
+   * @param img_res_id  Resource id of icon
+   */
+  public void setPrompt(int text_res_id, int img_res_id)
+  {
+    promptText.setText(text_res_id);
+    promptImage.setImageResource(img_res_id);
+  }
+
+  /**
+   * Set display content of prompt message
+   *
+   * @param text       Text of message
+   * @param img_res_id Resource id of icon
+   */
+  public void setPrompt(String text, int img_res_id)
+  {
+    promptText.setText(text);
+    promptImage.setImageResource(img_res_id);
+  }
+
+  /**
+   * Set display content of prompt message
+   *
+   * @param text_res_id Resource id of text
+   * @param img         Drawable of icon
+   */
+  public void setPrompt(int text_res_id, Drawable img)
+  {
+    promptText.setText(text_res_id);
+    promptImage.setImageDrawable(img);
+  }
+
+  /**
+   * Set display content of prompt message
+   *
+   * @param text Text of message
+   * @param img  Drawable of icon
+   */
+  public void setPrompt(String text, Drawable img)
+  {
+    promptText.setText(text);
+    promptImage.setImageDrawable(img);
+  }
+
+  /**
+   * Set display content of prompt message
+   *
+   * @param text_res_id Resource id of text
+   */
+  public void setPromptText(int text_res_id)
+  {
+    promptText.setText(text_res_id);
+  }
+
+  /**
+   * Set display content of prompt message
+   *
+   * @param text Text of message
+   */
+  public void setPromptText(String text)
+  {
+    promptText.setText(text);
+  }
+
+  /**
+   * Set display content of prompt message
+   *
+   * @param img Drawable of icon
+   */
+  public void setPromptImage(Drawable img)
+  {
+    promptImage.setImageDrawable(img);
+  }
+
+  /**
+   * Set display icon of prompt message
+   *
+   * @param img_res_id Resource id of icon
+   */
+  public void setPromptImage(int img_res_id)
+  {
+    promptImage.setImageResource(img_res_id);
+  }
+
+  /**
+   * Set display text of footerBar
+   *
+   * @param text text
+   */
+  public void setFooterText(@Nullable String text)
+  {
+    dockedFooterText.setText(text);
+    scrollFooterText.setText(text);
+  }
+
+  /**
+   * Set an implementation of {@link List} which contains the data to display.
+   *
+   * @param list An implementation of {@link List}
+   */
+  public void setData(List list)
+  {
+    dataList = list;
+  }
+
+  /**
+   * Set the listener of SwipeAdapterView's action
+   *
+   * @param listener {@link ActionListener}
+   */
+  public void setActionListener(@NonNull ActionListener listener)
   {
     actionListener = listener;
   }
 
-  public void SetContentView(View view)
+  /**
+   * Set default messages.
+   *
+   * @param msgAlreadyLoading {@link Common#TOAST} / When a refresh/load-more action happen while a previous one is still in progress.
+   * @param msgLoading        Footer & Prompt / While loading data
+   * @param msgRefreshSuccess Footer / When {@link #NotifyRefreshSuccess} is called.
+   * @param msgRefreshEmpty   Footer / When {@link #NotifyRefreshEmpty} is called.
+   * @param msgRefreshFailure Footer / When {@link #NotifyRefreshFailure} is called.
+   * @param msgMoreSuccess    Footer / When {@link #NotifyMoreSuccess} is called.
+   * @param msgMoreEmpty      Footer / When {@link #NotifyMoreEmpty} is called.
+   * @param msgMoreFailure    Footer / When {@link #NotifyMoreFailure} is called.
+   */
+  public void setDefaultMessage(@NonNull String msgAlreadyLoading, @NonNull String msgLoading, @NonNull String msgRefreshSuccess, @NonNull String msgRefreshEmpty, @NonNull String msgRefreshFailure, @NonNull String msgMoreSuccess, @NonNull String msgMoreEmpty, @NonNull String msgMoreFailure)
   {
-    Log.i("SwipeAdapterView", "SetContentView");
-    swipeRefreshLayout.addView(view);
-  }
-
-  public void SetContentView(int view_res_id)
-  {
-    swipeRefreshLayout.addView(View.inflate(context, view_res_id, null));
-  }
-
-  public void SetFooterEnabled(boolean enabled)
-  {
-    footerEnabled = enabled;
-    int visibility = enabled ? VISIBLE : GONE;
-    footer.setVisibility(visibility);
-    footer_Text.setVisibility(visibility);
-    footer_Progress.setVisibility(GONE);
-  }
-
-  public boolean GetFooterEnabled()
-  {
-    return footerEnabled;
-  }
-
-  public void SetViewMode(@Nullable ViewMode view_mode)
-  {
-    if(view_mode != null)
+    if(!TextUtils.isEmpty(msgAlreadyLoading))
     {
-      viewMode = view_mode;
-      if(viewMode == ViewMode.ListView)
+      this.msgAlreadyLoading = msgAlreadyLoading;
+    }
+    if(!TextUtils.isEmpty(msgLoading))
+    {
+      this.msgLoading = msgLoading;
+    }
+    if(!TextUtils.isEmpty(msgRefreshSuccess))
+    {
+      this.msgRefreshSuccess = msgRefreshSuccess;
+    }
+    if(!TextUtils.isEmpty(msgRefreshEmpty))
+    {
+      this.msgRefreshEmpty = msgRefreshEmpty;
+    }
+    if(!TextUtils.isEmpty(msgRefreshFailure))
+    {
+      this.msgRefreshFailure = msgRefreshFailure;
+    }
+    if(!TextUtils.isEmpty(msgMoreSuccess))
+    {
+      this.msgMoreSuccess = msgMoreSuccess;
+    }
+    if(!TextUtils.isEmpty(msgMoreEmpty))
+    {
+      this.msgMoreEmpty = msgMoreEmpty;
+    }
+    if(!TextUtils.isEmpty(msgMoreFailure))
+    {
+      this.msgMoreFailure = msgMoreFailure;
+    }
+  }
+
+  /**
+   * First time to load data. Typically used when the UI component first Attached. ForEX:Activity.onStart()
+   */
+  public void startLoad()
+  {
+    if(swipeRefreshLayout != null)
+    {
+      swipeRefreshLayout.post(new Runnable()
       {
-        columnNum = data_GridView.getNumColumns();
-        data_GridView.setNumColumns(1);
-      }else
-      {
-        if(columnNum <= 0)
+        @Override
+        public void run()
         {
-          columnNum = 1;
+          swipeRefreshLayout.setRefreshing(true);
+          onRefreshListener.onRefresh();
         }
-        data_GridView.setNumColumns(columnNum);
-      }
+      });
     }
   }
 
-  public void SetDataAdapter(BaseAdapter adapter)
-  {
-    data_GridView.setAdapter(adapter);
-    adapter.notifyDataSetChanged();
-  }
-
-  public void SetColumnNum(int cols)
-  {
-    Log.i("SwipeAdapterView", "SetColumnNum:" + cols);
-    columnNum = cols > 0 ? cols : 1;
-    if(viewMode == ViewMode.GridView)
-    {
-      data_GridView.setNumColumns(columnNum);
-    }
-  }
-
-  public void SetPromptType(PromptType type)
-  {
-    if(type != null)
-    {
-      promptType = type;
-    }
-    if(promptType != null)
-    {
-      switch(promptType)
-      {
-        case Text:
-          prompt_Image.setVisibility(GONE);
-          break;
-        case Image:
-          prompt_Text.setVisibility(GONE);
-          break;
-        case ImageText_TB:
-          prompt_Text.setVisibility(VISIBLE);
-          prompt_Image.setVisibility(VISIBLE);
-          break;
-        case ImageText_LR:
-          prompt_Text.setVisibility(VISIBLE);
-          prompt_Image.setVisibility(VISIBLE);
-          break;
-        case ImageText_RL:
-          prompt_Text.setVisibility(VISIBLE);
-          prompt_Image.setVisibility(VISIBLE);
-          break;
-        case ImageText_BT:
-          prompt_Text.setVisibility(VISIBLE);
-          prompt_Image.setVisibility(VISIBLE);
-          break;
-      }
-    }
-  }
-
-  public void SetPrompt(int text_res_id, int img_res_id)
-  {
-    prompt_Text.setText(text_res_id);
-    prompt_Image.setImageResource(img_res_id);
-  }
-
-  public void SetPrompt(String text, int img_res_id)
-  {
-    prompt_Text.setText(text);
-    prompt_Image.setImageResource(img_res_id);
-  }
-
-  public void SetPrompt(int text_res_id, Drawable img)
-  {
-    prompt_Text.setText(text_res_id);
-    prompt_Image.setImageDrawable(img);
-  }
-
-  public void SetPrompt(String text, Drawable img)
-  {
-    prompt_Text.setText(text);
-    prompt_Image.setImageDrawable(img);
-  }
-
-  public void SetPromptText(int text_res_id)
-  {
-    prompt_Text.setText(text_res_id);
-  }
-
-  public void SetPromptText(String text)
-  {
-    prompt_Text.setText(text);
-  }
-
-  public void SetPromptImage(Drawable img)
-  {
-    prompt_Image.setImageDrawable(img);
-  }
-
-  public void SetPromptImage(int img_res_id)
-  {
-    prompt_Image.setImageResource(img_res_id);
-  }
-
-  public void SetFooterText(@Nullable String text)
-  {
-    Log.i("SwipeAdapterView", "SetFooterText: " + text);
-    footer_Text.setText(text);
-  }
-
+  /**
+   * Call this in UI thread when refreshing task has succeeded with data.
+   *
+   * @param message Text to display on footerBar, or Null to use default string 'Success'.
+   */
   public void NotifyRefreshSuccess(@Nullable String message)
   {
-    Log.i("SwipeAdapterView", "NotifyRefreshSuccess: " + message);
     if(TextUtils.isEmpty(message))
     {
-      message = "Success.";
+      message = msgRefreshSuccess;
     }
+    isLoading = false;
     swipeRefreshLayout.setRefreshing(false);
-    ChangeFooter(FooterStatus.Loaded, message);
-    if(actionListener != null)
-    {
-      actionListener.OnRefreshed(true);
-      ShowContent();
-    }else
-    {
-      ShowError();
-    }
+    dataAdapter.notifyDataSetChanged();
+    showDataList();
+    changeFooter(FooterStatus.Loaded, message);
   }
 
+  /**
+   * Call this in UI thread when refreshing task has succeeded with no data.
+   *
+   * @param message Text to display on footerBar, or Null to use default string 'Empty'.
+   */
   public void NotifyRefreshEmpty(@Nullable String message)
   {
-    Log.i("SwipeAdapterView", "NotifyRefreshEmpty: " + message);
     if(TextUtils.isEmpty(message))
     {
-      message = "Empty.";
+      message = msgRefreshEmpty;
     }
+    isLoading = false;
     swipeRefreshLayout.setRefreshing(false);
-    ChangeFooter(FooterStatus.Hide, message);
-    if(actionListener != null)
-    {
-      actionListener.OnRefreshed(true);
-      SetPromptText("empty");
-      ShowPrompt();
-    }else
-    {
-      ShowError();
-    }
+    changeFooter(FooterStatus.Hide, message);
   }
 
+  /**
+   * Call this in UI thread when refreshing task has failed.
+   *
+   * @param message Text to display on footerBar, or Null to use default string 'Failure'.
+   */
   public void NotifyRefreshFailure(@Nullable String message)
   {
-    Log.i("SwipeAdapterView", "NotifyRefreshFailure: " + message);
     if(TextUtils.isEmpty(message))
     {
-      message = "Failure.";
+      message = msgRefreshFailure;
     }
+    isLoading = false;
     swipeRefreshLayout.setRefreshing(false);
-    ChangeFooter(FooterStatus.Hide, message);
-    if(actionListener != null)
-    {
-      actionListener.OnRefreshed(false);
-      SetPromptText("fail");
-      ShowPrompt();
-    }else
-    {
-      ShowError();
-    }
+    changeFooter(FooterStatus.Hide, message);
   }
 
-  public void NotifyNextSuccess(@Nullable String message)
+  /**
+   * Call this in UI thread when load-more task has succeeded with data.
+   *
+   * @param message Text to display on footerBar, or Null to use default string 'Success'.
+   */
+  public void NotifyMoreSuccess(@Nullable String message)
   {
-    Log.i("SwipeAdapterView", "NotifyNextSuccess: " + message);
     if(TextUtils.isEmpty(message))
     {
-      message = "Success.";
+      message = msgMoreSuccess;
     }
-    ChangeFooter(FooterStatus.Loaded, message);
-    if(actionListener != null)
-    {
-      actionListener.OnNexted(true);
-    }else
-    {
-      ShowError();
-    }
+    isLoading = false;
+    dataAdapter.notifyDataSetChanged();
+    showDataList();
+    changeFooter(FooterStatus.Loaded, message);
   }
 
-  public void NotifyNextEmpty(@Nullable String message)
+  /**
+   * Call this in UI thread when load-more task has succeeded with no data.
+   *
+   * @param message Text to display on footerBar, or Null to use default string 'Empty'.
+   */
+  public void NotifyMoreEmpty(@Nullable String message)
   {
-    Log.i("SwipeAdapterView", "NotifyNextEmpty: " + message);
     if(TextUtils.isEmpty(message))
     {
-      message = "Empty.";
+      message = msgMoreEmpty;
     }
-    ChangeFooter(FooterStatus.Empty, message);
-    if(actionListener != null)
-    {
-      actionListener.OnNexted(true);
-    }else
-    {
-      ShowError();
-    }
+    isLoading = false;
+    changeFooter(FooterStatus.Empty, message);
   }
 
-  public void NotifyNextFailure(@Nullable String message)
+  /**
+   * Call this in UI thread when load-more task has failed.
+   *
+   * @param message Text to display on footerBar, or Null to use default string 'Failure'.
+   */
+  public void NotifyMoreFailure(@Nullable String message)
   {
-    Log.i("SwipeAdapterView", "NotifyNextFailure: " + message);
     if(TextUtils.isEmpty(message))
     {
-      message = "Failure.";
+      message = msgMoreFailure;
     }
-    ChangeFooter(FooterStatus.Fail, message);
-    if(actionListener != null)
-    {
-      actionListener.OnNexted(false);
-    }else
-    {
-      ShowError();
-    }
+    isLoading = false;
+    changeFooter(FooterStatus.Fail, message);
   }
 
-  @Override
-  public void onClick(View v)
+  /**
+   * Switch {@link #viewFlipper} to show the page of data list.
+   */
+  private void showDataList()
   {
-    Log.i("SwipeAdapterView", "onClick");
-    if(actionListener != null)
-    {
-      ChangeFooter(FooterStatus.Loading, "Loading...");
-      actionListener.OnNexting();
-    }else
-    {
-      ShowError();
-    }
-  }
-
-  @Override
-  public void onRefresh()
-  {
-    Log.i("SwipeAdapterView", "onRefresh");
-    if(actionListener != null)
-    {
-      ShowPrompt("loading");
-      ChangeFooter(FooterStatus.Hide, null);
-      actionListener.OnRefreshing();
-    }else
-    {
-      ShowError();
-    }
-  }
-
-  @Override
-  public void onScrollStateChanged(AbsListView view, int scrollState)
-  {
-  }
-
-  @Override
-  public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-  {
-    swipeRefreshLayout.setEnabled(firstVisibleItem == 0);
-  }
-
-  @Override
-  public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-  {
-    if(actionListener != null)
-    {
-      actionListener.OnItemSelect(position, data_GridView.getItemAtPosition(position), view);
-    }
-  }
-
-  private void ShowContent()
-  {
-    Log.i("SwipeAdapterView", "ShowContent");
-    int curPage = flipper_Main.getDisplayedChild();
+    int curPage = viewFlipper.getDisplayedChild();
     if(curPage != 0)
     {
-      flipper_Main.setDisplayedChild(0);
+      viewFlipper.setDisplayedChild(0);
     }
   }
 
-  private void ShowPrompt(@Nullable String message)
+  /**
+   * Switch {@link #viewFlipper} to show the page of prompt having current text not changed.
+   */
+  private void showPrompt()
   {
-    Log.i("SwipeAdapterView", "ShowPrompt");
-    int curPage = flipper_Main.getDisplayedChild();
+    showPrompt(null);
+  }
+
+  /**
+   * Switch {@link #viewFlipper} to show the page of prompt with new text.
+   */
+  private void showPrompt(@Nullable String message)
+  {
+    int curPage = viewFlipper.getDisplayedChild();
     if(curPage != 1)
     {
-      flipper_Main.setDisplayedChild(1);
+      viewFlipper.setDisplayedChild(1);
       if(!TextUtils.isEmpty(message))
       {
-        SetPromptText(message);
+        setPromptText(message);
       }
     }
   }
 
-  private void ShowPrompt()
+  /**
+   * Switch {@link #viewFlipper} to show the page of bug hint.<br>
+   * This page is used to show only when an unhandled internal exception occurred.
+   */
+  private void ShowBug()
   {
-    ShowPrompt(null);
-  }
-
-  private void ShowError()
-  {
-    Log.i("SwipeAdapterView", "ShowError");
-    int curPage = flipper_Main.getDisplayedChild();
+    int curPage = viewFlipper.getDisplayedChild();
     if(curPage != 2)
     {
-      flipper_Main.setDisplayedChild(2);
+      viewFlipper.setDisplayedChild(2);
     }
   }
 
-  private void ChangeFooter(@NonNull FooterStatus status, @Nullable String message)
+  /**
+   * Change status and text of  footerBar.
+   *
+   * @param status  New status.{@link FooterStatus}
+   * @param message New text to display
+   */
+  private void changeFooter(@NonNull FooterStatus status, @Nullable String message)
   {
-    Log.i("SwipeAdapterView", "ChangeFooter: " + status.name() + "__" + message + "_" + footerEnabled);
-    SetFooterText(message);
-    if(footerEnabled)
+    setFooterText(message);
+    if(savedFooterMode != FooterMode.Disabled)
     {
       switch(status)
       {
         case Hide:
-          footer.setVisibility(GONE);
+          dockedFooterBar.setVisibility(GONE);
+          scrollFooterBar.setVisibility(GONE);
           break;
         case Loading:
-          footer.setVisibility(VISIBLE);
-          footer_Progress.setVisibility(VISIBLE);
+          dockedFooterBar.setVisibility(VISIBLE);
+          dockedFooterProgress.setVisibility(VISIBLE);
+          scrollFooterBar.setVisibility(VISIBLE);
+          scrollFooterProgress.setVisibility(VISIBLE);
           break;
         case Loaded:
-          footer.setVisibility(VISIBLE);
-          footer_Progress.setVisibility(GONE);
+          dockedFooterBar.setVisibility(VISIBLE);
+          dockedFooterProgress.setVisibility(GONE);
+          scrollFooterBar.setVisibility(VISIBLE);
+          scrollFooterProgress.setVisibility(GONE);
           break;
         case Empty:
-          footer.setVisibility(VISIBLE);
-          footer_Progress.setVisibility(GONE);
+          dockedFooterBar.setVisibility(VISIBLE);
+          dockedFooterProgress.setVisibility(GONE);
+          scrollFooterBar.setVisibility(VISIBLE);
+          scrollFooterProgress.setVisibility(GONE);
           break;
         case Fail:
-          footer.setVisibility(VISIBLE);
-          footer_Progress.setVisibility(GONE);
+          dockedFooterBar.setVisibility(VISIBLE);
+          dockedFooterProgress.setVisibility(GONE);
+          scrollFooterBar.setVisibility(VISIBLE);
+          scrollFooterProgress.setVisibility(GONE);
           break;
       }
-    }
-  }
-
-  private int GetPixFromDip(Context context, int dip)
-  {
-    if(context != null)
-    {
-      return (int) (dip * context.getResources().getDisplayMetrics().density + 0.5f);
-    }else
-    {
-      return 0;
     }
   }
 }

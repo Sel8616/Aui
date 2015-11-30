@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1">
+
+  <android.support.v4.widget.SwipeRefreshLayout
+      android:id="@+id/swipeRefreshLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+    <ViewFlipper
+        android:id="@+id/swipe_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+      <GridView
+          android:id="@+id/swipe_content"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"/>
+
+      <include
+          android:id="@+id/swipe_prompt"
+          layout="@layout/swipe_adapter_view_prompt"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"/>
+
+      <include
+          android:id="@+id/swipe_error"
+          layout="@layout/swipe_adapter_view_error"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"/>
+    </ViewFlipper>
+  </android.support.v4.widget.SwipeRefreshLayout>
+
+  <ImageView
+      android:id="@+id/faButton"
+      android:layout_width="@dimen/fab_size"
+      android:layout_height="@dimen/fab_size"
+      android:layout_gravity="bottom|end"
+      android:layout_margin="@dimen/fab_margin"
+      android:contentDescription="@string/ContentDescription_FloatingButton"
+      android:maxHeight="@dimen/fab_size"
+      android:maxWidth="@dimen/fab_size"
+      android:scaleType="fitCenter"
+      android:src="@drawable/selector_up_top"/>
+</FrameLayout>

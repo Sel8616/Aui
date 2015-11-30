@@ -1,4 +1,4 @@
-package cn.sel.AuiDemo;
+package cn.sel.aui_demo;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -23,9 +23,8 @@ public class Activity_PictureView extends Activity implements View.OnClickListen
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_pic);
-
     input_Url = (EditText) findViewById(R.id.input_url);
-    input_Url.setText("https://www.baidu.com/img/bdlogo.png");
+    input_Url.setText("https://git.oschina.net/sel/R/raw/master/img/aui.png");
     pictureView = (PictureView) findViewById(R.id.pictureView);
     findViewById(R.id.btn_url).setOnClickListener(this);
     findViewById(R.id.btn_choose).setOnClickListener(this);

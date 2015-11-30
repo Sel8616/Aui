@@ -15,15 +15,11 @@ import android.widget.ViewSwitcher;
 import java.io.InputStream;
 import java.net.URL;
 
-/**
- * @author sel QQ:117764756 Email:sel8616@gmail.com philshang@163.com
- */
 public class PictureView extends ViewSwitcher
 {
   private Context context;
   private ImageView imageView;
   private ProgressBar progressBar;
-
   private Drawable loadingImage;
   private Drawable errorImage;
 
@@ -55,7 +51,7 @@ public class PictureView extends ViewSwitcher
     measure(0, 0);
     int dpi = getResources().getDisplayMetrics().densityDpi;
     int dip = dpi < 120 ? 32 : dpi < 240 ? 48 : dpi < 320 ? 64 : dpi < 480 ? 72 : 96;
-    int pix = GetPixFromDip(context, dip);
+    int pix = Common.getPixFromDip(context, dip);
     int size = Math.min(getMeasuredWidth(), getMeasuredHeight());
     if(size > 0)
     {
@@ -91,7 +87,6 @@ public class PictureView extends ViewSwitcher
           try
           {
             String url = params[0];
-            Log.d("PictureView", "Get PIC from given host: " + url);
             InputStream is = (InputStream) new URL(url).getContent();
             if(is != null)
             {
@@ -167,16 +162,5 @@ public class PictureView extends ViewSwitcher
       progressBar.setIndeterminateDrawable(loadingImage);
     }
     setDisplayedChild(1);
-  }
-
-  private int GetPixFromDip(Context context, int dip)
-  {
-    if(context != null)
-    {
-      return (int) (dip * context.getResources().getDisplayMetrics().density + 0.5f);
-    }else
-    {
-      return 0;
-    }
   }
 }

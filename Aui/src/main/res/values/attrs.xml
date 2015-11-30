@@ -13,11 +13,19 @@
       <enum name="ImageLeft_TextRight" value="4"/>
       <enum name="ImageRight_TextLeft" value="5"/>
     </attr>
-    <attr name="FooterEnabled" format="enum">
-      <enum name="False" value="0"/>
-      <enum name="True" value="1"/>
+    <attr name="FooterMode" format="enum">
+      <enum name="Disabled" value="0"/>
+      <enum name="Docked" value="1"/>
+      <enum name="Scrolling" value="2"/>
+    </attr>
+    <attr name="TranscriptMode" format="enum">
+      <enum name="Disabled" value="0"/>
+      <enum name="Normal" value="1"/>
+      <enum name="AlwaysScroll" value="2"/>
     </attr>
     <attr name="FooterHeight" format="dimension|reference"/>
     <attr name="FooterBackground" format="reference"/>
+    <attr name="FloatingButtonBackground" format="reference"/>
+    <attr name="FloatingButtonEnabled" format="boolean"/>
   </declare-styleable>
 </resources>

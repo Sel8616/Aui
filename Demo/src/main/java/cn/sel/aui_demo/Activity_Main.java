@@ -33,6 +33,9 @@ public class Activity_Main extends Activity
           case 2:
             intent = new Intent(Activity_Main.this, Activity_ViewLooper.class);
             break;
+          case 3:
+            intent = new Intent(Activity_Main.this, Activity_RockerButton.class);
+            break;
           default:
             Toast.makeText(Activity_Main.this, "Coming soon...", Toast.LENGTH_SHORT).show();
             break;

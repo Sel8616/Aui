@@ -27,5 +27,8 @@
     <activity
         android:name=".Activity_ViewLooper"
         android:label="@string/title_looper"/>
+    <activity
+        android:name=".Activity_RockerButton"
+        android:label="@string/title_rocker"/>
   </application>
 </manifest>

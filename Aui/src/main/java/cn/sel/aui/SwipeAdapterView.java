@@ -158,7 +158,7 @@ public class SwipeAdapterView extends LinearLayout
     @Override
     public void onClick(View v)
     {
-      if(v.getId() == R.id.faButton)
+      if(v.getId() == R.id.rocker_button)
       {
         dataGridView.smoothScrollToPosition(0);
       }else
@@ -176,6 +176,32 @@ public class SwipeAdapterView extends LinearLayout
           ShowBug();
         }
       }
+    }
+  };
+  final RockerButton.ActionLister actionLister = new RockerButton.ActionLister()
+  {
+    @Override
+    public void onLeft()
+    {
+      Common.ShowMessage(context, "LEFT");
+    }
+
+    @Override
+    public void onRight()
+    {
+      Common.ShowMessage(context, "RIGHT");
+    }
+
+    @Override
+    public void onUp()
+    {
+      Common.ShowMessage(context, "UP");
+    }
+
+    @Override
+    public void onDown()
+    {
+      Common.ShowMessage(context, "DOWN");
     }
   };
 
@@ -260,7 +286,7 @@ public class SwipeAdapterView extends LinearLayout
   private LinearLayout dockedFooterBar, scrollFooterBar;
   private TextView dockedFooterText, scrollFooterText;
   private ProgressBar dockedFooterProgress, scrollFooterProgress;
-  private ImageView floatingButton;
+  private RockerButton rockerButton;
 
   public SwipeAdapterView(Context context)
   {
@@ -300,7 +326,7 @@ public class SwipeAdapterView extends LinearLayout
     dockedFooterProgress = (ProgressBar) dockedFooterBar.findViewById(R.id.swipe_footer_progress);
     scrollFooterText = (TextView) scrollFooterBar.findViewById(R.id.swipe_footer_text);
     scrollFooterProgress = (ProgressBar) scrollFooterBar.findViewById(R.id.swipe_footer_progress);
-    floatingButton = (ImageView) findViewById(R.id.faButton);
+    rockerButton = (RockerButton) findViewById(R.id.rocker_button);
     changeFooter(FooterStatus.Hide, null);
     dataGridView.setAdapter(dataAdapter);
     swipeRefreshLayout.setOnRefreshListener(onRefreshListener);
@@ -308,7 +334,8 @@ public class SwipeAdapterView extends LinearLayout
     dataGridView.setOnItemClickListener(onItemClickListener);
     dockedFooterBar.setOnClickListener(onClickListener);
     scrollFooterBar.setOnClickListener(onClickListener);
-    floatingButton.setOnClickListener(onClickListener);
+    rockerButton.setOnClickListener(onClickListener);
+    rockerButton.setActionListener(actionLister);
   }
 
   private void InitCustomAttributes(AttributeSet attrs, int defStyle)
@@ -418,7 +445,6 @@ public class SwipeAdapterView extends LinearLayout
     scrollFooterBar.setLayoutParams(footerBarLayoutParams);
     dockedFooterBar.setBackgroundDrawable(footerBackground);
     scrollFooterBar.setBackgroundDrawable(footerBackground);
-    floatingButton.setImageDrawable(floatingButtonDrawable);
   }
 
   /**
@@ -437,7 +463,7 @@ public class SwipeAdapterView extends LinearLayout
 
   public void setFloatingButtonEnable(boolean enabled)
   {
-    floatingButton.setVisibility(enabled ? VISIBLE : GONE);
+    rockerButton.setVisibility(enabled ? VISIBLE : GONE);
   }
 
   /**

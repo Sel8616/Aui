@@ -34,15 +34,10 @@
     </ViewFlipper>
   </android.support.v4.widget.SwipeRefreshLayout>
 
-  <ImageView
-      android:id="@+id/faButton"
-      android:layout_width="@dimen/fab_size"
-      android:layout_height="@dimen/fab_size"
+  <cn.sel.aui.RockerButton
+      android:id="@+id/rocker_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
       android:layout_gravity="bottom|end"
-      android:layout_margin="@dimen/fab_margin"
-      android:contentDescription="@string/ContentDescription_FloatingButton"
-      android:maxHeight="@dimen/fab_size"
-      android:maxWidth="@dimen/fab_size"
-      android:scaleType="fitCenter"
-      android:src="@drawable/selector_up_top"/>
+      android:layout_margin="@dimen/rocker_button_margin"/>
 </FrameLayout>

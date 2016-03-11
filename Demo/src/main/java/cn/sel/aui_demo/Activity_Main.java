@@ -25,7 +25,7 @@ public class Activity_Main extends Activity
         switch(position)
         {
           case 0:
-            intent = new Intent(Activity_Main.this, Activity_SwipeAdapterView.class);
+            intent = new Intent(Activity_Main.this, Activity_SwipeRocker.class);
             break;
           case 1:
             intent = new Intent(Activity_Main.this, Activity_PictureView.class);

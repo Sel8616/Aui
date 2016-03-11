@@ -19,7 +19,7 @@
       </intent-filter>
     </activity>
     <activity
-        android:name=".Activity_SwipeAdapterView"
+        android:name=".Activity_SwipeRocker"
         android:label="@string/title_swipe"/>
     <activity
         android:name=".Activity_PictureView"

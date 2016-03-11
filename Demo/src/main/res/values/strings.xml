@@ -1,6 +1,6 @@
 <resources>
   <string name="app_name">Aui Demo</string>
-  <string name="title_swipe">SwipeAdapterView Demo</string>
+  <string name="title_swipe">SwipeRockerListView Demo</string>
   <string name="title_picture">PictureView Demo</string>
   <string name="title_looper">ViewLooper Demo</string>
   <string name="title_rocker">RockerButton Demo</string>

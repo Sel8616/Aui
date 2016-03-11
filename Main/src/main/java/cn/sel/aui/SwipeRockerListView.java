@@ -22,7 +22,9 @@ import android.widget.ViewFlipper;
 
 import java.util.List;
 
-public class SwipeAdapterView extends LinearLayout
+import cn.sel.aui.RockerButton.RockerMode;
+
+public class SwipeRockerListView extends LinearLayout
 {
   public enum ViewMode
   {
@@ -104,7 +106,7 @@ public class SwipeAdapterView extends LinearLayout
     {
       if(isLoading)
       {
-        Common.ShowMessage(context, msgAlreadyLoading);
+        Common.ShowMessage(context, msgBusy);
       }else if(actionListener != null)
       {
         showPrompt(msgLoading);
@@ -160,12 +162,12 @@ public class SwipeAdapterView extends LinearLayout
     {
       if(v.getId() == R.id.rocker_button)
       {
-        dataGridView.smoothScrollToPosition(0);
+        dataGridView.smoothScrollToPositionFromTop(0, 0, 0);
       }else
       {
         if(isLoading)
         {
-          Common.ShowMessage(context, msgAlreadyLoading);
+          Common.ShowMessage(context, msgBusy);
         }else if(actionListener != null)
         {
           changeFooter(FooterStatus.Loading, msgLoading);
@@ -181,27 +183,38 @@ public class SwipeAdapterView extends LinearLayout
   final RockerButton.ActionLister actionLister = new RockerButton.ActionLister()
   {
     @Override
-    public void onLeft()
+    public void onLeft(float traction)
     {
-      Common.ShowMessage(context, "LEFT");
+      int first = dataGridView.getFirstVisiblePosition();
+      dataGridView.smoothScrollToPosition(0, first);
     }
 
     @Override
-    public void onRight()
+    public void onRight(float traction)
     {
-      Common.ShowMessage(context, "RIGHT");
+      int last = dataGridView.getLastVisiblePosition();
+      int pageSize = dataGridView.getChildCount();
+      int count = dataAdapter.getCount();
+      boolean isLastChildEntirelyVisible = dataGridView.getChildAt(pageSize - 1).getBottom() == dataGridView.getBottom();
+      int target = Math.min(count - 1, isLastChildEntirelyVisible ? last + 1 : last);
+      dataGridView.smoothScrollToPositionFromTop(target, 0);
     }
 
     @Override
-    public void onUp()
+    public void onUp(float traction)
     {
-      Common.ShowMessage(context, "UP");
+      dataGridView.smoothScrollToPosition(0);
     }
 
     @Override
-    public void onDown()
+    public void onDown(float traction)
     {
-      Common.ShowMessage(context, "DOWN");
+      dataGridView.smoothScrollToPosition(dataAdapter.getCount());
+    }
+
+    @Override
+    public void onStop(RockerButton.Direction direction)
+    {
     }
   };
 
@@ -210,6 +223,19 @@ public class SwipeAdapterView extends LinearLayout
    */
   private class DataAdapter extends BaseAdapter
   {
+    @Override
+    public void notifyDataSetChanged()
+    {
+      super.notifyDataSetChanged();
+      final int columns = dataGridView.getNumColumns();
+      for(int i = 0; i < getCount(); i += columns)
+      {
+        View itemView = getView(i, null, dataGridView);
+        itemView.measure(0, 0);
+        totalHeight += itemView.getMeasuredHeight();
+      }
+    }
+
     @Override
     public int getCount()
     {
@@ -259,8 +285,8 @@ public class SwipeAdapterView extends LinearLayout
 
   private Context context;
   private int columnNum;
+  private int totalHeight;
   private boolean isLoading;
-  private Drawable floatingButtonDrawable;
   private Drawable footerBackground;
   private ViewMode savedViewMode;
   private FooterMode savedFooterMode;
@@ -270,7 +296,7 @@ public class SwipeAdapterView extends LinearLayout
   private List dataList;
   //
   private String msgLoading = "Loading...";
-  private String msgAlreadyLoading = "Slow down your finger!";
+  private String msgBusy = "Slow down your finger!";
   private String msgRefreshSuccess = "Success!";
   private String msgRefreshEmpty = "No Data!";
   private String msgRefreshFailure = "Failure!";
@@ -288,21 +314,21 @@ public class SwipeAdapterView extends LinearLayout
   private ProgressBar dockedFooterProgress, scrollFooterProgress;
   private RockerButton rockerButton;
 
-  public SwipeAdapterView(Context context)
+  public SwipeRockerListView(Context context)
   {
     super(context);
     InitViews();
     InitCustomAttributes(null, 0);
   }
 
-  public SwipeAdapterView(Context context, AttributeSet attrs)
+  public SwipeRockerListView(Context context, AttributeSet attrs)
   {
     super(context, attrs);
     InitViews();
     InitCustomAttributes(attrs, 0);
   }
 
-  public SwipeAdapterView(Context context, AttributeSet attrs, int defStyle)
+  public SwipeRockerListView(Context context, AttributeSet attrs, int defStyle)
   {
     super(context, attrs, defStyle);
     InitViews();
@@ -336,61 +362,64 @@ public class SwipeAdapterView extends LinearLayout
     scrollFooterBar.setOnClickListener(onClickListener);
     rockerButton.setOnClickListener(onClickListener);
     rockerButton.setActionListener(actionLister);
+    rockerButton.setRockerMode(RockerMode.ONCE, RockerMode.ONCE, RockerMode.ONCE, RockerMode.ONCE);
   }
 
   private void InitCustomAttributes(AttributeSet attrs, int defStyle)
   {
     int style_view_mode, style_prompt_mode, style_footer_mode, list_transcript_mode;
     int footerHeight = context.getResources().getDimensionPixelSize(R.dimen.footer_height);
-    final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SwipeAdapterView, defStyle, 0);
-    if(a.hasValue(R.styleable.SwipeAdapterView_ViewMode))
+    final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SwipeRockerListView, defStyle, 0);
+    if(a.hasValue(R.styleable.SwipeRockerListView_ViewMode))
     {
-      style_view_mode = a.getInt(R.styleable.SwipeAdapterView_ViewMode, 0);
+      style_view_mode = a.getInt(R.styleable.SwipeRockerListView_ViewMode, 0);
     }else
     {
       style_view_mode = 0;
     }
-    if(a.hasValue(R.styleable.SwipeAdapterView_PromptMode))
+    if(a.hasValue(R.styleable.SwipeRockerListView_PromptMode))
     {
-      style_prompt_mode = a.getInt(R.styleable.SwipeAdapterView_PromptMode, 0);
+      style_prompt_mode = a.getInt(R.styleable.SwipeRockerListView_PromptMode, 0);
     }else
     {
       style_prompt_mode = 0;
     }
-    if(a.hasValue(R.styleable.SwipeAdapterView_FooterMode))
+    if(a.hasValue(R.styleable.SwipeRockerListView_FooterMode))
     {
-      style_footer_mode = a.getInt(R.styleable.SwipeAdapterView_FooterMode, 1);
+      style_footer_mode = a.getInt(R.styleable.SwipeRockerListView_FooterMode, 1);
     }else
     {
       style_footer_mode = 1;
     }
-    if(a.hasValue(R.styleable.SwipeAdapterView_TranscriptMode))
+    if(a.hasValue(R.styleable.SwipeRockerListView_TranscriptMode))
     {
-      list_transcript_mode = a.getInt(R.styleable.SwipeAdapterView_TranscriptMode, 1);
+      list_transcript_mode = a.getInt(R.styleable.SwipeRockerListView_TranscriptMode, 1);
     }else
     {
       list_transcript_mode = 1;
     }
-    if(a.hasValue(R.styleable.SwipeAdapterView_FooterHeight))
+    if(a.hasValue(R.styleable.SwipeRockerListView_FooterHeight))
     {
-      footerHeight = a.getDimensionPixelSize(R.styleable.SwipeAdapterView_FooterHeight, footerHeight);
+      footerHeight = a.getDimensionPixelSize(R.styleable.SwipeRockerListView_FooterHeight, footerHeight);
     }
-    if(a.hasValue(R.styleable.SwipeAdapterView_FloatingButtonBackground))
+    if(a.hasValue(R.styleable.SwipeRockerListView_RockerButtonBackground))
     {
-      floatingButtonDrawable = a.getDrawable(R.styleable.SwipeAdapterView_FloatingButtonBackground);
+      int background = a.getResourceId(R.styleable.SwipeRockerListView_RockerButtonBackground, R.drawable.bg_rocker_button);
+      rockerButton.setBackgroundResource(background);
     }
-    if(a.hasValue(R.styleable.SwipeAdapterView_FooterBackground))
+    if(a.hasValue(R.styleable.SwipeRockerListView_RockerButtonForeground))
     {
-      footerBackground = a.getDrawable(R.styleable.SwipeAdapterView_FooterBackground);
+      int foreground = a.getResourceId(R.styleable.SwipeRockerListView_RockerButtonForeground, R.drawable.bg_rocker_button);
+      rockerButton.setImageResource(foreground);
     }
-    boolean floatingButtonEnabled = !a.hasValue(R.styleable.SwipeAdapterView_FloatingButtonEnabled) || a.getBoolean(R.styleable.SwipeAdapterView_FloatingButtonEnabled, true);
+    if(a.hasValue(R.styleable.SwipeRockerListView_FooterBackground))
+    {
+      footerBackground = a.getDrawable(R.styleable.SwipeRockerListView_FooterBackground);
+    }
+    boolean floatingButtonEnabled = !a.hasValue(R.styleable.SwipeRockerListView_RockerButtonEnabled) || a.getBoolean(R.styleable.SwipeRockerListView_RockerButtonEnabled, true);
     a.recycle();
-    setFloatingButtonEnable(floatingButtonEnabled);
+    setRockerButtonEnable(floatingButtonEnabled);
     setViewMode(style_view_mode == 0 ? ViewMode.ListView : ViewMode.GridView);
-    if(floatingButtonDrawable == null)
-    {
-      floatingButtonDrawable = getResources().getDrawable(R.drawable.selector_up_top);
-    }
     if(footerBackground == null)
     {
       footerBackground = getResources().getDrawable(android.R.drawable.bottom_bar);
@@ -461,8 +490,9 @@ public class SwipeAdapterView extends LinearLayout
     }
   }
 
-  public void setFloatingButtonEnable(boolean enabled)
+  public void setRockerButtonEnable(boolean enabled)
   {
+    rockerButton.setEnabled(enabled);
     rockerButton.setVisibility(enabled ? VISIBLE : GONE);
   }
 
@@ -582,23 +612,16 @@ public class SwipeAdapterView extends LinearLayout
     switch(savedPromptType)
     {
       case Text:
+        promptText.setVisibility(VISIBLE);
         promptImage.setVisibility(GONE);
         break;
       case Image:
         promptText.setVisibility(GONE);
+        promptImage.setVisibility(VISIBLE);
         break;
       case ImageText_TB:
-        promptText.setVisibility(VISIBLE);
-        promptImage.setVisibility(VISIBLE);
-        break;
       case ImageText_LR:
-        promptText.setVisibility(VISIBLE);
-        promptImage.setVisibility(VISIBLE);
-        break;
       case ImageText_RL:
-        promptText.setVisibility(VISIBLE);
-        promptImage.setVisibility(VISIBLE);
-        break;
       case ImageText_BT:
         promptText.setVisibility(VISIBLE);
         promptImage.setVisibility(VISIBLE);
@@ -728,20 +751,20 @@ public class SwipeAdapterView extends LinearLayout
   /**
    * Set default messages.
    *
-   * @param msgAlreadyLoading {@link Common#TOAST} / When a refresh/load-more action happen while a previous one is still in progress.
-   * @param msgLoading        Footer & Prompt / While loading data
-   * @param msgRefreshSuccess Footer / When {@link #NotifyRefreshSuccess} is called.
-   * @param msgRefreshEmpty   Footer / When {@link #NotifyRefreshEmpty} is called.
-   * @param msgRefreshFailure Footer / When {@link #NotifyRefreshFailure} is called.
-   * @param msgMoreSuccess    Footer / When {@link #NotifyMoreSuccess} is called.
-   * @param msgMoreEmpty      Footer / When {@link #NotifyMoreEmpty} is called.
-   * @param msgMoreFailure    Footer / When {@link #NotifyMoreFailure} is called.
+   * @param msgBusy           Displayed in {@link Common#TOAST} / When a refresh/load-more action happen while a previous one is still in progress.
+   * @param msgLoading        Displayed in Footer & Prompt / While loading data
+   * @param msgRefreshSuccess Displayed in Footer / When {@link #NotifyRefreshSuccess} is called.
+   * @param msgRefreshEmpty   Displayed in Footer / When {@link #NotifyRefreshEmpty} is called.
+   * @param msgRefreshFailure Displayed in Footer / When {@link #NotifyRefreshFailure} is called.
+   * @param msgMoreSuccess    Displayed in Footer / When {@link #NotifyMoreSuccess} is called.
+   * @param msgMoreEmpty      Displayed in Footer / When {@link #NotifyMoreEmpty} is called.
+   * @param msgMoreFailure    Displayed in Footer / When {@link #NotifyMoreFailure} is called.
    */
-  public void setDefaultMessage(@NonNull String msgAlreadyLoading, @NonNull String msgLoading, @NonNull String msgRefreshSuccess, @NonNull String msgRefreshEmpty, @NonNull String msgRefreshFailure, @NonNull String msgMoreSuccess, @NonNull String msgMoreEmpty, @NonNull String msgMoreFailure)
+  public void setDefaultMessage(@NonNull String msgBusy, @NonNull String msgLoading, @NonNull String msgRefreshSuccess, @NonNull String msgRefreshEmpty, @NonNull String msgRefreshFailure, @NonNull String msgMoreSuccess, @NonNull String msgMoreEmpty, @NonNull String msgMoreFailure)
   {
-    if(!TextUtils.isEmpty(msgAlreadyLoading))
+    if(!TextUtils.isEmpty(msgBusy))
     {
-      this.msgAlreadyLoading = msgAlreadyLoading;
+      this.msgBusy = msgBusy;
     }
     if(!TextUtils.isEmpty(msgLoading))
     {

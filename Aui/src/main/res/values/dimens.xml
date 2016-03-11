@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <dimen name="footer_height">48dp</dimen>
-  <dimen name="fab_size">56dp</dimen>
-  <dimen name="rocker_button_margin">16dp</dimen>
-</resources>

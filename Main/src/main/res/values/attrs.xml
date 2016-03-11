@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <declare-styleable name="SwipeAdapterView">
+  <declare-styleable name="SwipeRockerListView">
     <attr name="ViewMode" format="enum">
       <enum name="List" value="0"/>
       <enum name="Grid" value="1"/>
@@ -25,7 +25,8 @@
     </attr>
     <attr name="FooterHeight" format="dimension|reference"/>
     <attr name="FooterBackground" format="reference"/>
-    <attr name="FloatingButtonBackground" format="reference"/>
-    <attr name="FloatingButtonEnabled" format="boolean"/>
+    <attr name="RockerButtonBackground" format="reference"/>
+    <attr name="RockerButtonForeground" format="reference"/>
+    <attr name="RockerButtonEnabled" format="boolean"/>
   </declare-styleable>
 </resources>

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-  <cn.sel.aui.SwipeAdapterView
+  <cn.sel.aui.SwipeRockerListView
       android:id="@+id/aui_swipe"
       android:layout_width="match_parent"
       android:layout_height="match_parent"

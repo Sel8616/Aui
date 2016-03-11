@@ -14,16 +14,16 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.sel.aui.SwipeAdapterView;
+import cn.sel.aui.SwipeRockerListView;
 
-public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterView.ActionListener
+public class Activity_SwipeRocker extends Activity implements SwipeRockerListView.ActionListener
 {
   private List<String> data_all;
   private List<String> data_got;
   private List<String> buffer;
   private int pageSize;
   private int cols;
-  private SwipeAdapterView swipe;
+  private SwipeRockerListView swipe;
   private Toast toast;
   private Handler handler;
 
@@ -32,7 +32,7 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_swipe);
-    swipe = (SwipeAdapterView) findViewById(R.id.aui_swipe);
+    swipe = (SwipeRockerListView) findViewById(R.id.aui_swipe);
     cols = 1;
     pageSize = 12;
     buffer = new ArrayList<>(pageSize);
@@ -91,10 +91,10 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
     switch(item.getItemId())
     {
       case R.id.Menu_ViewMode_List:
-        swipe.setViewMode(SwipeAdapterView.ViewMode.ListView);
+        swipe.setViewMode(SwipeRockerListView.ViewMode.ListView);
         break;
       case R.id.Menu_ViewMode_Grid:
-        swipe.setViewMode(SwipeAdapterView.ViewMode.GridView);
+        swipe.setViewMode(SwipeRockerListView.ViewMode.GridView);
         break;
       case R.id.Menu_Column_Add:
         swipe.setColumnNum(++cols);
@@ -107,28 +107,28 @@ public class Activity_SwipeAdapterView extends Activity implements SwipeAdapterV
         swipe.setColumnNum(cols);
         break;
       case R.id.Menu_FooterMode_Docked:
-        swipe.setFooterMode(SwipeAdapterView.FooterMode.Docked);
+        swipe.setFooterMode(SwipeRockerListView.FooterMode.Docked);
         break;
       case R.id.Menu_FooterMode_Scrolling:
-        swipe.setFooterMode(SwipeAdapterView.FooterMode.Scrolling);
+        swipe.setFooterMode(SwipeRockerListView.FooterMode.Scrolling);
         break;
       case R.id.Menu_FooterMode_Disabled:
-        swipe.setFooterMode(SwipeAdapterView.FooterMode.Disabled);
+        swipe.setFooterMode(SwipeRockerListView.FooterMode.Disabled);
         break;
       case R.id.Menu_TranscriptMode_Disabled:
-        swipe.setTranscriptMode(SwipeAdapterView.TranscriptMode.Disabled);
+        swipe.setTranscriptMode(SwipeRockerListView.TranscriptMode.Disabled);
         break;
       case R.id.Menu_TranscriptMode_Normal:
-        swipe.setTranscriptMode(SwipeAdapterView.TranscriptMode.Normal);
+        swipe.setTranscriptMode(SwipeRockerListView.TranscriptMode.Normal);
         break;
       case R.id.Menu_TranscriptMode_AlwaysScroll:
-        swipe.setTranscriptMode(SwipeAdapterView.TranscriptMode.AlwaysScroll);
+        swipe.setTranscriptMode(SwipeRockerListView.TranscriptMode.AlwaysScroll);
         break;
-      case R.id.Menu_Floating_Enabled:
-        swipe.setFloatingButtonEnable(true);
+      case R.id.Menu_Rocker_Enabled:
+        swipe.setRockerButtonEnable(true);
         break;
-      case R.id.Menu_Floating_Disabled:
-        swipe.setFloatingButtonEnable(false);
+      case R.id.Menu_Rocker_Disabled:
+        swipe.setRockerButtonEnable(false);
         break;
       default:
         break;

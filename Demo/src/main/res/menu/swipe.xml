@@ -47,13 +47,13 @@
           android:title="Scrolling"/>
     </menu>
   </item>
-  <item android:title="FloatingButton">
+  <item android:title="RockerButton">
     <menu>
       <item
-          android:id="@+id/Menu_Floating_Enabled"
+          android:id="@+id/Menu_Rocker_Enabled"
           android:title="Enabled"/>
       <item
-          android:id="@+id/Menu_Floating_Disabled"
+          android:id="@+id/Menu_Rocker_Disabled"
           android:title="Disabled"/>
     </menu>
   </item>

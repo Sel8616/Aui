@@ -24,7 +24,7 @@ public class Activity_PictureView extends Activity implements View.OnClickListen
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_pic);
     input_Url = (EditText) findViewById(R.id.input_url);
-    input_Url.setText("https://git.oschina.net/sel/R/raw/master/img/aui.png");
+    input_Url.setText("https://git.oschina.net/sel/R/raw/master/img/aui_logo.png");
     pictureView = (PictureView) findViewById(R.id.pictureView);
     findViewById(R.id.btn_url).setOnClickListener(this);
     findViewById(R.id.btn_choose).setOnClickListener(this);
